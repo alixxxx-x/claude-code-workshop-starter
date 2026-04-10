@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { User, Phone, Lock, MapPin, Loader2, AlertCircle } from 'lucide-react'
 import { register, login } from '../lib/api'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Card, CardContent } from '../components/ui/card'
 
 const WILAYAS = [
   'Adrar','Chlef','Laghouat','Oum El Bouaghi','Batna','Béjaïa','Biskra','Béchar',
@@ -35,79 +40,103 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm p-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-emerald-600">دَوَاء</h1>
-          <p className="text-gray-500 mt-1 text-sm">Create a patient account</p>
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-sm">
+
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-block">
+            <h1 className="text-5xl font-bold text-emerald-600" style={{ fontFamily: 'Georgia, serif' }}>دَوَاء</h1>
+          </Link>
+          <p className="text-slate-500 mt-2 text-sm">Create a patient account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
-            <input
-              type="text"
-              placeholder="Ahmed Benali"
-              value={form.name}
-              onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            />
-          </div>
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Full name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Ahmed Benali"
+                    value={form.name}
+                    onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
-            <input
-              type="tel"
-              placeholder="0555 123 456"
-              value={form.phone}
-              onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            />
-          </div>
+              <div>
+                <Label htmlFor="phone">Phone number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+213 555 000 001"
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    required
+                    className="pl-10"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Wilaya</label>
-            <select
-              value={form.wilaya}
-              onChange={e => setForm(f => ({ ...f, wilaya: e.target.value }))}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            >
-              <option value="">Select your wilaya</option>
-              {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
-            </select>
-          </div>
+              <div>
+                <Label htmlFor="wilaya">Wilaya</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  <select
+                    id="wilaya"
+                    value={form.wilaya}
+                    onChange={e => setForm(f => ({ ...f, wilaya: e.target.value }))}
+                    className="flex h-10 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition appearance-none"
+                  >
+                    <option value="">Select your wilaya</option>
+                    {WILAYAS.map(w => <option key={w} value={w}>{w}</option>)}
+                  </select>
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="At least 6 characters"
-              value={form.password}
-              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              required
-              minLength={6}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            />
-          </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="At least 6 characters"
+                    value={form.password}
+                    onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                    required
+                    minLength={6}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+              {error && (
+                <div className="flex items-center gap-2 text-red-600 bg-red-50 rounded-xl px-3 py-2.5 text-sm">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {error}
+                </div>
+              )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
-          >
-            {loading ? 'Creating account…' : 'Create account'}
-          </button>
-        </form>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Creating account…</> : 'Create account'}
+              </Button>
+            </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Already have an account?{' '}
-          <Link to="/login" className="text-emerald-600 font-medium hover:underline">
-            Sign in
-          </Link>
-        </p>
+            <p className="text-center text-sm text-slate-500 mt-5 pt-5 border-t border-slate-100">
+              Already have an account?{' '}
+              <Link to="/login" className="text-emerald-600 font-medium hover:underline">
+                Sign in
+              </Link>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

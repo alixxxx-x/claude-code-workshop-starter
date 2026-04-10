@@ -1,6 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Phone, Lock, Loader2, AlertCircle } from 'lucide-react'
 import { login } from '../lib/api'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Card, CardContent } from '../components/ui/card'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -22,61 +27,82 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-sm p-8">
-        <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-emerald-600">دَوَاء</h1>
-          <p className="text-gray-500 mt-1 text-sm">Sign in to your account</p>
+    <div className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link to="/" className="inline-block">
+            <h1 className="text-5xl font-bold text-emerald-600" style={{ fontFamily: 'Georgia, serif' }}>دَوَاء</h1>
+          </Link>
+          <p className="text-slate-500 mt-2 text-sm">Sign in to your account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone number</label>
-            <input
-              type="tel"
-              placeholder="e.g. 0555 123 456"
-              value={form.phone}
-              onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            />
-          </div>
+        <Card>
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="phone">Phone number</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="+213 555 000 001"
+                    value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    required
+                    className="pl-10"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="••••••"
-              value={form.password}
-              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-            />
-          </div>
+              <div>
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                    required
+                    className="pl-10"
+                  />
+                </div>
+              </div>
 
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+              {error && (
+                <div className="flex items-center gap-2 text-red-600 bg-red-50 rounded-xl px-3 py-2.5 text-sm">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {error}
+                </div>
+              )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
-          >
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</> : 'Sign in'}
+              </Button>
+            </form>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
-          No account?{' '}
-          <Link to="/signup" className="text-emerald-600 font-medium hover:underline">
-            Sign up
-          </Link>
-        </p>
-        <p className="text-center text-sm text-gray-500 mt-2">
-          Pharmacist?{' '}
-          <Link to="/pharmacist/login" className="text-emerald-600 font-medium hover:underline">
-            Pharmacist login
-          </Link>
-        </p>
+            <div className="mt-5 pt-5 border-t border-slate-100 space-y-2 text-center text-sm text-slate-500">
+              <p>
+                No account?{' '}
+                <Link to="/signup" className="text-emerald-600 font-medium hover:underline">
+                  Sign up
+                </Link>
+              </p>
+              <p>
+                Pharmacist?{' '}
+                <Link to="/pharmacist/login" className="text-emerald-600 font-medium hover:underline">
+                  Pharmacist portal
+                </Link>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-xs text-slate-400 mt-6">Demo: +213555000001 / demo1234</p>
       </div>
     </div>
   )

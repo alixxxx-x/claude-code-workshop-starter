@@ -1,12 +1,31 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Package, ArrowLeftRight, Clock, CheckCircle2, LogOut, Loader2 } from 'lucide-react'
+import { Badge } from '../components/ui/badge'
+import { Button } from '../components/ui/button'
+import { Card, CardContent } from '../components/ui/card'
 import { getMe, getReservations, confirmReservation, completeReservation, logout } from '../lib/api'
 
-const STATUS_COLOR = {
-  pending: 'bg-yellow-100 text-yellow-700',
-  confirmed: 'bg-emerald-100 text-emerald-700',
-  completed: 'bg-gray-100 text-gray-600',
-  cancelled: 'bg-red-100 text-red-600',
+const STATUS_VARIANT = {
+  pending:   'warning',
+  confirmed: 'default',
+  completed: 'secondary',
+  cancelled: 'destructive',
+}
+
+function PharmacistNav({ onLogout }) {
+  return (
+    <nav className="bg-white/95 backdrop-blur-sm border-b border-slate-100 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+      <div className="flex items-center gap-2">
+        <span className="text-xl font-bold text-emerald-600" style={{ fontFamily: 'Georgia, serif' }}>دَوَاء</span>
+        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">Pharmacist</span>
+      </div>
+      <Button variant="ghost" size="sm" onClick={onLogout} className="text-slate-400 hover:text-red-500 gap-1.5">
+        <LogOut className="w-4 h-4" />
+        <span className="hidden sm:inline text-sm">Sign out</span>
+      </Button>
+    </nav>
+  )
 }
 
 export default function PharmacistDashboard() {
@@ -33,91 +52,94 @@ export default function PharmacistDashboard() {
     setReservations(rs => rs.map(r => r.id === updated.id ? updated : r))
   }
 
-  function handleLogout() {
-    logout()
-    navigate('/pharmacist/login')
-  }
+  function handleLogout() { logout(); navigate('/pharmacist/login') }
 
-  const pending = reservations.filter(r => r.status === 'pending')
+  const pending   = reservations.filter(r => r.status === 'pending')
   const confirmed = reservations.filter(r => r.status === 'confirmed')
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <p className="text-gray-400">Loading…</p>
+    <div className="min-h-screen bg-slate-50">
+      <PharmacistNav onLogout={handleLogout} />
+      <div className="flex items-center justify-center h-64 gap-2 text-slate-400 text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+      </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Pharmacist nav */}
-      <nav className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
-        <span className="text-xl font-bold text-emerald-600">دَوَاء <span className="text-xs font-normal text-gray-400">Pharmacist</span></span>
-        <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-red-500 transition">Sign out</button>
-      </nav>
+    <div className="min-h-screen bg-slate-50">
+      <PharmacistNav onLogout={handleLogout} />
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Welcome */}
+        {user?.name && (
+          <p className="text-slate-500 text-sm">Welcome back, <span className="font-semibold text-slate-700">{user.name}</span></p>
+        )}
 
         {/* Quick actions */}
         <div className="grid grid-cols-3 gap-3">
-          <Link to="/pharmacist/catalogue" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition text-center">
-            <span className="text-2xl">📦</span>
-            <p className="text-xs text-gray-600 mt-1 font-medium">Catalogue</p>
+          <Link to="/pharmacist/catalogue" className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition text-center border border-slate-100 group">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center mx-auto mb-2 group-hover:bg-emerald-100 transition">
+              <Package className="w-5 h-5 text-emerald-600" />
+            </div>
+            <p className="text-xs font-semibold text-slate-700">Catalogue</p>
           </Link>
-          <Link to="/pharmacist/exchange" className="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition text-center">
-            <span className="text-2xl">🔄</span>
-            <p className="text-xs text-gray-600 mt-1 font-medium">Exchange</p>
+          <Link to="/pharmacist/exchange" className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition text-center border border-slate-100 group">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mx-auto mb-2 group-hover:bg-blue-100 transition">
+              <ArrowLeftRight className="w-5 h-5 text-blue-600" />
+            </div>
+            <p className="text-xs font-semibold text-slate-700">Exchange</p>
           </Link>
-          <div className="bg-emerald-50 rounded-xl p-4 text-center">
-            <span className="text-2xl font-bold text-emerald-600">{pending.length}</span>
-            <p className="text-xs text-gray-600 mt-1 font-medium">Pending</p>
+          <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-4 text-center shadow-sm">
+            <p className="text-3xl font-bold text-white">{pending.length}</p>
+            <p className="text-xs font-semibold text-emerald-100 mt-1">Pending</p>
           </div>
         </div>
 
         {/* Pending reservations */}
         {pending.length > 0 && (
           <section>
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">Pending reservations</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 px-1">Pending reservations</h2>
             <div className="space-y-2">
               {pending.map(r => (
-                <div key={r.id} className="bg-white rounded-xl p-4 shadow-sm">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <p className="font-medium text-gray-800">{r.product_name}</p>
-                      <p className="text-xs text-gray-500">
-                        {r.type === 'b2b' ? '🔄 Inter-pharmacy' : '👤 Patient'} · Reserved {new Date(r.reserved_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                <Card key={r.id}>
+                  <CardContent className="pt-4">
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div>
+                        <p className="font-semibold text-slate-800">{r.product_name}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {r.type === 'b2b' ? 'Inter-pharmacy' : 'Patient'} · Reserved {new Date(r.reserved_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                      <Badge variant={STATUS_VARIANT[r.status]}>{r.status}</Badge>
                     </div>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLOR[r.status]}`}>{r.status}</span>
-                  </div>
-                  <button
-                    onClick={() => confirm(r.id)}
-                    className="w-full bg-emerald-600 text-white text-sm py-2 rounded-lg hover:bg-emerald-700 transition"
-                  >
-                    Confirm pickup
-                  </button>
-                </div>
+                    <Button onClick={() => confirm(r.id)} className="w-full gap-2" size="sm">
+                      <CheckCircle2 className="w-4 h-4" /> Confirm pickup
+                    </Button>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </section>
         )}
 
-        {/* Confirmed reservations */}
+        {/* Confirmed */}
         {confirmed.length > 0 && (
           <section>
-            <h2 className="text-lg font-semibold text-gray-800 mb-3">Confirmed — awaiting pickup</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3 px-1">Awaiting pickup</h2>
             <div className="space-y-2">
               {confirmed.map(r => (
-                <div key={r.id} className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-800 text-sm">{r.product_name}</p>
-                    <p className="text-xs text-gray-400">Deadline: {new Date(r.pickup_deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <div key={r.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-800 text-sm truncate">{r.product_name}</p>
+                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3" />
+                      Deadline {new Date(r.pickup_deadline).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
-                  <button
-                    onClick={() => complete(r.id)}
-                    className="bg-gray-100 text-gray-700 text-xs px-3 py-1.5 rounded-lg hover:bg-gray-200 transition"
-                  >
-                    Mark complete
-                  </button>
+                  <Button variant="secondary" size="sm" onClick={() => complete(r.id)}>
+                    Mark done
+                  </Button>
                 </div>
               ))}
             </div>
@@ -125,10 +147,14 @@ export default function PharmacistDashboard() {
         )}
 
         {reservations.length === 0 && (
-          <div className="bg-white rounded-xl p-8 text-center">
-            <p className="text-gray-500 text-sm">No reservations yet.</p>
-            <Link to="/pharmacist/catalogue" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">Add products to your catalogue →</Link>
-          </div>
+          <Card>
+            <CardContent className="py-10 text-center">
+              <p className="text-slate-500 text-sm">No reservations yet.</p>
+              <Link to="/pharmacist/catalogue" className="text-emerald-600 text-sm hover:underline mt-2 inline-block">
+                Add products to your catalogue →
+              </Link>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>

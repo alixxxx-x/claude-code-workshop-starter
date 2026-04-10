@@ -1,21 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { MapPin, Phone, ShieldCheck, Pill, ShoppingBag, ChevronLeft, Loader2, CheckCircle2, XCircle, Navigation } from 'lucide-react'
 import Navbar from '../components/Navbar'
+import { Badge } from '../components/ui/badge'
+import { Card, CardContent } from '../components/ui/card'
 import { getPharmacy, getPharmacyProducts, getPharmacyAvailability } from '../lib/api'
 
-const CONFIDENCE_COLOR = {
-  high: 'bg-emerald-100 text-emerald-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-orange-100 text-orange-700',
-  unknown: 'bg-gray-100 text-gray-500',
-}
-
-const STOCK_COLOR = {
-  high: 'text-emerald-600',
-  medium: 'text-yellow-600',
-  low: 'text-orange-600',
-  out: 'text-red-500',
-}
+const CONFIDENCE_VARIANT = { high: 'default', medium: 'warning', low: 'orange', unknown: 'secondary' }
+const STOCK_VARIANT       = { high: 'default', medium: 'warning', low: 'orange', out: 'destructive' }
+const STOCK_LABEL         = { high: 'In stock', medium: 'Available', low: 'Low stock', out: 'Out of stock' }
 
 export default function PharmacyDetail() {
   const { id } = useParams()
@@ -28,9 +21,7 @@ export default function PharmacyDetail() {
   useEffect(() => {
     async function load() {
       const [ph, prods, avail] = await Promise.all([
-        getPharmacy(id),
-        getPharmacyProducts(id),
-        getPharmacyAvailability(id),
+        getPharmacy(id), getPharmacyProducts(id), getPharmacyAvailability(id),
       ])
       setPharmacy(ph)
       setProducts(Array.isArray(prods) ? prods : [])
@@ -41,125 +32,157 @@ export default function PharmacyDetail() {
   }, [id])
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-400">Loading…</p>
+      <div className="flex items-center justify-center h-64 gap-2 text-slate-400 text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" /> Loading…
       </div>
     </div>
   )
 
   if (!pharmacy) return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <p className="text-gray-500">Pharmacy not found.</p>
+        <p className="text-slate-500">Pharmacy not found.</p>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
       <div className="max-w-2xl mx-auto px-4 py-6">
 
-        {/* Header */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm mb-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">{pharmacy.name}</h1>
-              <p className="text-sm text-gray-500 mt-1">{pharmacy.address}</p>
-              <p className="text-sm text-gray-500">{pharmacy.wilaya}</p>
-            </div>
-            {pharmacy.is_verified && (
-              <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full font-medium">Verified</span>
-            )}
-          </div>
-          {pharmacy.phone && (
-            <a href={`tel:${pharmacy.phone}`} className="inline-block mt-3 text-sm text-emerald-600 hover:underline">
-              📞 {pharmacy.phone}
-            </a>
-          )}
-          {pharmacy.lat && pharmacy.lng && (
-            <a
-              href={`https://maps.google.com/?q=${pharmacy.lat},${pharmacy.lng}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block ml-4 mt-3 text-sm text-emerald-600 hover:underline"
-            >
-              🗺️ Navigate
-            </a>
-          )}
-        </div>
+        <Link to="/search/medicine" className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 mb-4">
+          <ChevronLeft className="w-4 h-4" /> Back
+        </Link>
 
-        {/* Tabs */}
-        <div className="flex gap-1 bg-gray-100 rounded-xl p-1 mb-4">
-          {['medicines', 'shop'].map(t => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-2 text-sm font-medium rounded-lg transition ${tab === t ? 'bg-white shadow-sm text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
-            >
-              {t === 'medicines' ? '💊 Medicines' : '🛍️ Shop'}
-            </button>
-          ))}
+        {/* Header card */}
+        <Card className="mb-4">
+          <CardContent className="pt-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-xl font-bold text-slate-800">{pharmacy.name}</h1>
+                  {pharmacy.is_verified && (
+                    <Badge variant="default" className="gap-1">
+                      <ShieldCheck className="w-3 h-3" /> Verified
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 text-sm text-slate-500 mt-1.5">
+                  <MapPin className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{pharmacy.address}, {pharmacy.wilaya}</span>
+                </div>
+                {pharmacy.hours && (
+                  <p className="text-xs text-slate-400 mt-1">{pharmacy.hours}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-slate-100">
+              {pharmacy.phone && (
+                <a
+                  href={`tel:${pharmacy.phone}`}
+                  className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                >
+                  <Phone className="w-4 h-4" /> {pharmacy.phone}
+                </a>
+              )}
+              {pharmacy.lat && pharmacy.lng && (
+                <a
+                  href={`https://maps.google.com/?q=${pharmacy.lat},${pharmacy.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                >
+                  <Navigation className="w-4 h-4" /> Navigate
+                </a>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tab switcher */}
+        <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-4">
+          <button
+            onClick={() => setTab('medicines')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-lg transition ${
+              tab === 'medicines' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <Pill className="w-4 h-4" /> Medicines
+          </button>
+          <button
+            onClick={() => setTab('shop')}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium rounded-lg transition ${
+              tab === 'shop' ? 'bg-white shadow-sm text-slate-800' : 'text-slate-500 hover:text-slate-700'
+            }`}
+          >
+            <ShoppingBag className="w-4 h-4" /> Shop
+          </button>
         </div>
 
         {/* Medicines tab */}
         {tab === 'medicines' && (
-          <div>
-            {availability.length === 0 ? (
-              <div className="bg-white rounded-xl p-6 text-center">
-                <p className="text-gray-500 text-sm">No availability reports yet for this pharmacy.</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {availability.map(r => (
-                  <div key={r.id} className="bg-white rounded-xl p-4 shadow-sm flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-sm text-gray-800">{r.medicine_name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {r.status === 'found' ? '✅ Found' : '❌ Not found'} · {new Date(r.reported_at).toLocaleDateString()}
-                      </p>
+          availability.length === 0 ? (
+            <Card><CardContent className="py-10 text-center">
+              <p className="text-slate-500 text-sm">No availability reports yet for this pharmacy.</p>
+            </CardContent></Card>
+          ) : (
+            <div className="space-y-2">
+              {availability.map(r => (
+                <div key={r.id} className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-slate-800 truncate">{r.medicine_name}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {r.status === 'found'
+                        ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                        : <XCircle className="w-3.5 h-3.5 text-red-400" />
+                      }
+                      <span className="text-xs text-slate-400">
+                        {r.status === 'found' ? 'Found' : 'Not found'} · {new Date(r.reported_at).toLocaleDateString()}
+                      </span>
                     </div>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${CONFIDENCE_COLOR[r.confidence] || CONFIDENCE_COLOR.unknown}`}>
-                      {r.confidence}
-                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <Badge variant={CONFIDENCE_VARIANT[r.confidence] || 'secondary'} className="shrink-0">
+                    {r.confidence}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          )
         )}
 
         {/* Shop tab */}
         {tab === 'shop' && (
-          <div>
-            {products.length === 0 ? (
-              <div className="bg-white rounded-xl p-6 text-center">
-                <p className="text-gray-500 text-sm">No products listed yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {products.map(p => (
-                  <Link
-                    key={p.id}
-                    to={`/product/${p.id}`}
-                    className="flex items-center justify-between bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition"
-                  >
-                    <div>
-                      <p className="font-medium text-sm text-gray-800">{p.name}</p>
-                      <p className="text-xs text-gray-500">{p.brand}</p>
-                      <p className={`text-xs mt-0.5 font-medium ${STOCK_COLOR[p.stock_level]}`}>
-                        {p.stock_level === 'out' ? 'Out of stock' : `Stock: ${p.stock_level}`}
-                      </p>
+          products.length === 0 ? (
+            <Card><CardContent className="py-10 text-center">
+              <p className="text-slate-500 text-sm">No products listed yet.</p>
+            </CardContent></Card>
+          ) : (
+            <div className="space-y-2">
+              {products.map(p => (
+                <Link
+                  key={p.id}
+                  to={`/product/${p.id}`}
+                  className="flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition border border-slate-100 gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-sm text-slate-800 truncate">{p.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{p.brand}</p>
+                    <div className="mt-1">
+                      <Badge variant={STOCK_VARIANT[p.stock_level]}>{STOCK_LABEL[p.stock_level]}</Badge>
                     </div>
-                    <p className="font-semibold text-gray-800 text-sm">{p.price_dzd.toLocaleString()} DZD</p>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+                  </div>
+                  <p className="font-bold text-slate-800 text-sm shrink-0">
+                    {p.price_dzd.toLocaleString()} <span className="text-xs font-normal text-slate-400">DZD</span>
+                  </p>
+                </Link>
+              ))}
+            </div>
+          )
         )}
       </div>
     </div>
