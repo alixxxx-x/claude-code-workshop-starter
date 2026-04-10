@@ -27,15 +27,15 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 to-emerald-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
 
         {/* Logo */}
         <div className="text-center mb-8">
           <Link to="/" className="inline-block">
-            <h1 className="text-5xl font-bold text-emerald-600" style={{ fontFamily: 'Georgia, serif' }}>دَوَاء</h1>
+            <h1 className="text-5xl font-bold text-primary" style={{ fontFamily: 'Georgia, serif' }}>Dawa</h1>
           </Link>
-          <p className="text-slate-500 mt-2 text-sm">Sign in to your account</p>
+          <p className="text-muted-foreground mt-2 text-sm">Sign in to your account</p>
         </div>
 
         <Card>
@@ -44,7 +44,7 @@ export default function Login() {
               <div>
                 <Label htmlFor="phone">Phone number</Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="phone"
                     type="tel"
@@ -60,7 +60,7 @@ export default function Login() {
               <div>
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
@@ -80,21 +80,21 @@ export default function Login() {
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} className="w-full">
+              <Button type="submit" disabled={loading} className="w-full bg-secondary hover:bg-secondary/90 border-none text-white">
                 {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</> : 'Sign in'}
               </Button>
             </form>
 
-            <div className="mt-5 pt-5 border-t border-slate-100 space-y-2 text-center text-sm text-slate-500">
+            <div className="mt-5 pt-5 border-t border-border space-y-2 text-center text-sm text-muted-foreground">
               <p>
                 No account?{' '}
-                <Link to="/signup" className="text-emerald-600 font-medium hover:underline">
+                <Link to="/signup" className="text-primary font-medium hover:underline">
                   Sign up
                 </Link>
               </p>
               <p>
                 Pharmacist?{' '}
-                <Link to="/pharmacist/login" className="text-emerald-600 font-medium hover:underline">
+                <Link to="/pharmacist/login" className="text-primary font-medium hover:underline">
                   Pharmacist portal
                 </Link>
               </p>
@@ -102,7 +102,7 @@ export default function Login() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-slate-400 mt-6">Demo: +213555000001 / demo1234</p>
+        <p className="text-center text-xs text-muted-foreground mt-6">Demo: +213555000001 / demo1234</p>
       </div>
     </div>
   )
