@@ -4,64 +4,158 @@
 Read PROJECT.md for the full project plan. Always check it before starting a new feature.
 
 ## Stack
-- **Framework**: Next.js 16 (App Router) with TypeScript
-- **Styling**: Tailwind CSS v4
-- **Database + Auth**: Supabase (client in `src/lib/supabase.ts`)
-- **Deploy**: Vercel (free tier)
-
-## Important: Next.js 16
-This version has breaking changes from older Next.js. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
+- **Framework**: React.js with JavaScript
+- **Styling**: Tailwind CSS v4, Shadcn, 21st Dev
+- **Database + Auth**: Django + PostgresSQL
+- **Deploy**: Render (free tier)
 
 ## Commands
-- `npm run dev` — start dev server on localhost:3000
+### Frontend (React + Vite)
+- `npm run dev` — start dev server on localhost:5173
 - `npm run build` — production build
-- `npx vercel --prod` — deploy to production
+- Deploy via Render dashboard (connect GitHub repo, set as Static Site)
+
+### Backend (Django)
+- `python manage.py runserver` — start Django dev server on localhost:8000
+- `python manage.py makemigrations` — generate migrations from model changes
+- `python manage.py migrate` — apply migrations to the database
+- `python manage.py createsuperuser` — create an admin user
 
 ## Project Structure
 ```
-src/
-  app/          — pages and layouts (App Router)
-  lib/          — utilities (supabase client is here)
-  components/   — reusable UI components (create as needed)
+frontend/
+  src/
+    pages/        — page-level components (one per route)
+    components/   — reusable UI components
+    lib/          — API client and utilities
+
+backend/
+  manage.py
+  config/         — Django settings, urls, wsgi
+  api/            — Django app: models, views, serializers, urls
 ```
 
 ## Rules
-- Use the Supabase client from `src/lib/supabase.ts` for all database and auth operations
-- Use server components by default. Only add `'use client'` when you need interactivity
+- All API calls go through `frontend/src/lib/api.js` — never use fetch directly in components
+- Use React Router for client-side routing. Put page components in `src/pages/`
 - Use Tailwind CSS utility classes for all styling. No CSS modules or inline styles
 - Keep components small and focused. One component per file
-- Put new pages in `src/app/` following Next.js App Router conventions
 - Put reusable components in `src/components/`
-- Environment variables are already configured — don't modify `.env.local`
-- When creating Supabase tables, generate full SQL (CREATE TABLE + RLS policies) and tell the user to run it in the Supabase SQL Editor. See `supabase/setup.sql` for the pattern
-- When setting up auth, use Supabase Auth with email/password
+- Environment variables: use `VITE_API_URL` in frontend (prefix with `VITE_`), standard Django settings in backend — set these in the Render dashboard per service, never hardcode them
+- When creating new data models, write the Django model in `api/models.py`, then run `makemigrations` + `migrate`
+- Use Django REST Framework for API endpoints. Write serializers in `api/serializers.py` and views in `api/views.py`
+- Use Django's built-in auth (`django.contrib.auth`) with JWT tokens (djangorestframework-simplejwt) for authentication
+- Store the JWT token in `localStorage` and include it as `Authorization: Bearer <token>` on all authenticated requests
+- When creating new tables, tell the user to run `python manage.py makemigrations && python manage.py migrate`
 - After completing a feature, suggest the user commit with git
 
-## Supabase Quick Reference
-```typescript
-import { supabase } from '@/lib/supabase'
+## Django API Quick Reference
+```python
+# models.py
+from django.db import models
+from django.contrib.auth.models import User
 
-// Read
-const { data, error } = await supabase.from('table_name').select('*')
+class MyModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-// Insert
-const { data, error } = await supabase.from('table_name').insert({ column: 'value' })
+# serializers.py
+from rest_framework import serializers
+from .models import MyModel
 
-// Update
-const { data, error } = await supabase.from('table_name').update({ column: 'new_value' }).eq('id', id)
+class MyModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MyModel
+        fields = '__all__'
 
-// Delete
-const { data, error } = await supabase.from('table_name').delete().eq('id', id)
+# views.py
+from rest_framework import viewsets, permissions
+from .models import MyModel
+from .serializers import MyModelSerializer
+
+class MyModelViewSet(viewsets.ModelViewSet):
+    serializer_class = MyModelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return MyModel.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+```
+
+## Frontend API Client Quick Reference
+```javascript
+// src/lib/api.js
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
+function getHeaders() {
+  const token = localStorage.getItem('token')
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  }
+}
 
 // Auth - sign up
-const { data, error } = await supabase.auth.signUp({ email, password })
+export async function signUp(email, password) {
+  const res = await fetch(`${API_URL}/api/auth/register/`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ email, password }),
+  })
+  return res.json()
+}
 
-// Auth - sign in
-const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-
-// Auth - get current user
-const { data: { user } } = await supabase.auth.getUser()
+// Auth - sign in (stores token)
+export async function signIn(email, password) {
+  const res = await fetch(`${API_URL}/api/token/`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({ email, password }),
+  })
+  const data = await res.json()
+  if (data.access) localStorage.setItem('token', data.access)
+  return data
+}
 
 // Auth - sign out
-await supabase.auth.signOut()
+export function signOut() {
+  localStorage.removeItem('token')
+}
+
+// Read
+export async function getItems() {
+  const res = await fetch(`${API_URL}/api/items/`, { headers: getHeaders() })
+  return res.json()
+}
+
+// Create
+export async function createItem(payload) {
+  const res = await fetch(`${API_URL}/api/items/`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  })
+  return res.json()
+}
+
+// Update
+export async function updateItem(id, payload) {
+  const res = await fetch(`${API_URL}/api/items/${id}/`, {
+    method: 'PATCH',
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+  })
+  return res.json()
+}
+
+// Delete
+export async function deleteItem(id) {
+  await fetch(`${API_URL}/api/items/${id}/`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  })
+}
 ```
