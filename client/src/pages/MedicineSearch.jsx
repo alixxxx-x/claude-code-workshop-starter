@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import {
   Search, ChevronLeft, Loader2, Pill, CheckCircle2, XCircle,
@@ -281,17 +281,17 @@ export default function MedicineSearch() {
   const detailRef = useRef(null)
   const isLoggedIn = !!localStorage.getItem(ACCESS_TOKEN)
 
-  useEffect(() => {
-    const q = searchParams.get('q')
-    if (q) { setQuery(q); doSearch(q) }
-  }, [])
-
-  async function doSearch(q) {
+  const doSearch = useCallback(async (q) => {
     setLoading(true); setSelected(null); setPharmacies([])
     const data = await searchMedicines(q)
     setMedicines(Array.isArray(data) ? data : [])
     setLoading(false)
-  }
+  }, [])
+
+  useEffect(() => {
+    const q = searchParams.get('q')
+    if (q) { setQuery(q); doSearch(q) }
+  }, [searchParams, doSearch])
 
   function handleSubmit(e) {
     e.preventDefault()

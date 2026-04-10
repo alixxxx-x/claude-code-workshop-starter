@@ -88,7 +88,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'pharmacy', 'pharmacy_name', 'pharmacy_wilaya',
                   'name', 'brand', 'category', 'price_dzd', 'wholesale_price_dzd',
-                  'stock_level', 'is_b2b_listed', 'photo_url', 'created_at']
+                  'description', 'stock_level', 'is_b2b_listed', 'photo_url', 'created_at']
         read_only_fields = ['created_at']
 
 

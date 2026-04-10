@@ -16,7 +16,7 @@ const CATEGORIES = [
   { key: 'wound_care',       label: 'Wound care',       icon: Bandage,  color: 'text-red-500 bg-red-50' },
   { key: 'oral_hygiene',     label: 'Oral hygiene',     icon: Smile,    color: 'text-cyan-500 bg-cyan-50' },
   { key: 'hair_care',        label: 'Hair care',        icon: Scissors, color: 'text-purple-500 bg-purple-50' },
-  { key: 'wellness_devices', label: 'Wellness',         icon: Activity, color: 'text-emerald-500 bg-emerald-50' },
+  { key: 'wellness_devices', label: 'Wellness',         icon: Activity, color: 'text-primary bg-primary/5' },
 ]
 
 export default function Home() {

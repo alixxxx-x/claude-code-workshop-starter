@@ -131,6 +131,7 @@ class Product(models.Model):
     wholesale_price_dzd = models.PositiveIntegerField(null=True, blank=True)
     stock_level = models.CharField(max_length=20, choices=STOCK_CHOICES, default=STOCK_MEDIUM)
     is_b2b_listed = models.BooleanField(default=False)
+    description = models.TextField(blank=True, help_text='Detailed product description')
     photo_url = models.URLField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

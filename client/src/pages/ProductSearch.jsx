@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import {
   Search, ShoppingBag, Loader2,
@@ -34,9 +34,7 @@ export default function ProductSearch() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => { load() }, [category])
-
-  async function load(q = query, cat = category) {
+  const load = useCallback(async (q = query, cat = category) => {
     setLoading(true)
     const params = {}
     if (q) params.q = q
@@ -44,7 +42,9 @@ export default function ProductSearch() {
     const data = await getProducts(params)
     setProducts(Array.isArray(data) ? data : [])
     setLoading(false)
-  }
+  }, [category, query])
+
+  useEffect(() => { load() }, [load])
 
   function handleSubmit(e) {
     e.preventDefault()

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   Package, ArrowLeftRight, Clock, CheckCircle2, Loader2,
   ShoppingBag, TrendingUp, AlertCircle, Users, ArrowRight,
@@ -17,7 +17,6 @@ const STATUS_STYLE = {
 }
 
 export default function PharmacistDashboard() {
-  const navigate = useNavigate()
   const [user, setUser] = useState(null)
   const [reservations, setReservations] = useState([])
   const [loading, setLoading] = useState(true)
