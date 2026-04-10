@@ -1,25 +1,31 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { Search, ShoppingBag, Loader2 } from 'lucide-react'
-import Navbar from '../components/Navbar'
-import { Badge } from '../components/ui/badge'
-import { Card, CardContent } from '../components/ui/card'
-import { getProducts } from '../lib/api'
+import {
+  Search, ShoppingBag, Loader2,
+  Sparkles, Baby, Zap, Bone, Bandage, Smile, Scissors, Activity
+} from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { getProducts } from '@/lib/api'
 
 const CATEGORIES = [
-  { key: '',                 label: 'All' },
-  { key: 'dermo_cosmetics',  label: 'Dermo-cosmetics' },
-  { key: 'baby_care',        label: 'Baby care' },
-  { key: 'supplements',      label: 'Supplements' },
-  { key: 'orthopedics',      label: 'Orthopedics' },
-  { key: 'wound_care',       label: 'Wound care' },
-  { key: 'oral_hygiene',     label: 'Oral hygiene' },
-  { key: 'hair_care',        label: 'Hair care' },
-  { key: 'wellness_devices', label: 'Wellness' },
+  { key: '',                 label: 'All',             icon: ShoppingBag },
+  { key: 'dermo_cosmetics',  label: 'Dermo-cosmetics', icon: Sparkles },
+  { key: 'baby_care',        label: 'Baby care',       icon: Baby },
+  { key: 'supplements',      label: 'Supplements',     icon: Zap },
+  { key: 'orthopedics',      label: 'Orthopedics',     icon: Bone },
+  { key: 'wound_care',       label: 'Wound care',      icon: Bandage },
+  { key: 'oral_hygiene',     label: 'Oral hygiene',    icon: Smile },
+  { key: 'hair_care',        label: 'Hair care',       icon: Scissors },
+  { key: 'wellness_devices', label: 'Wellness',        icon: Activity },
 ]
 
-const STOCK_VARIANT = { high: 'default', medium: 'warning', low: 'orange', out: 'destructive' }
-const STOCK_LABEL   = { high: 'In stock', medium: 'Available', low: 'Low stock', out: 'Out of stock' }
+const STOCK_BADGE = {
+  high:   { label: 'In stock',    className: 'bg-green-100 text-green-700' },
+  medium: { label: 'Available',   className: 'bg-yellow-100 text-yellow-700' },
+  low:    { label: 'Low stock',   className: 'bg-orange-100 text-orange-700' },
+  out:    { label: 'Out of stock',className: 'bg-red-100 text-red-600' },
+}
 
 export default function ProductSearch() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -49,89 +55,132 @@ export default function ProductSearch() {
     load(query, category)
   }
 
+  const activeCategory = CATEGORIES.find(c => c.key === category) || CATEGORIES[0]
+
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar />
-      <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="flex flex-col w-full">
 
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
-            <ShoppingBag className="w-5 h-5 text-blue-600" />
+      {/* ── Header ── */}
+      <section className="py-10 bg-background border-b border-border">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <ShoppingBag className="w-5 h-5 text-primary" />
+            </div>
+            <h1 className="text-2xl font-black text-foreground tracking-tight">Parapharmacy</h1>
           </div>
-          <h1 className="text-xl font-bold text-slate-800">Parapharmaceuticals</h1>
+          <p className="text-muted-foreground text-sm ml-13">Browse and reserve products from verified pharmacies near you.</p>
         </div>
+      </section>
 
-        <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+      <div className="max-w-7xl mx-auto px-6 py-8 w-full">
+
+        {/* ── Search ── */}
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <input
               type="text"
               placeholder="Search products (Avène, Mustela…)"
               value={query}
               onChange={e => setQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+              className="w-full pl-11 pr-4 py-3 rounded-full border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
             />
           </div>
-          <button
-            type="submit"
-            className="bg-emerald-600 text-white px-5 py-2.5 rounded-xl hover:bg-emerald-700 transition text-sm font-semibold shrink-0"
-          >
+          <Button type="submit" className="rounded-full px-8 h-11 font-bold bg-secondary hover:bg-secondary/90 border-none shadow-lg shadow-secondary/20">
             Search
-          </button>
+          </Button>
         </form>
 
-        {/* Category filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-5 -mx-4 px-4">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.key}
-              onClick={() => setCategory(cat.key)}
-              className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition border ${
-                category === cat.key
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-400'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+        {/* ── Category pills ── */}
+        <div className="flex gap-2 overflow-x-auto pb-2 mb-8 -mx-6 px-6 sm:mx-0 sm:px-0">
+          {CATEGORIES.map(cat => {
+            const Icon = cat.icon
+            const active = category === cat.key
+            return (
+              <button
+                key={cat.key}
+                onClick={() => setCategory(cat.key)}
+                className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                  active
+                    ? 'bg-secondary text-white border-secondary shadow-lg shadow-secondary/20'
+                    : 'bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-primary'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {cat.label}
+              </button>
+            )
+          })}
         </div>
 
+        {/* ── Results header ── */}
+        {!loading && products.length > 0 && (
+          <p className="text-xs text-muted-foreground mb-4 font-medium">
+            {products.length} product{products.length > 1 ? 's' : ''} in <span className="text-foreground font-bold">{activeCategory.label}</span>
+          </p>
+        )}
+
+        {/* ── Loading ── */}
         {loading && (
-          <div className="flex items-center gap-2 text-slate-400 text-sm py-8 justify-center">
-            <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+          <div className="flex items-center gap-2 text-muted-foreground text-sm py-16 justify-center">
+            <Loader2 className="w-4 h-4 animate-spin" /> Loading products…
           </div>
         )}
 
+        {/* ── Empty state ── */}
         {!loading && products.length === 0 && (
-          <Card>
-            <CardContent className="py-10 text-center">
-              <ShoppingBag className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-              <p className="text-slate-500 text-sm">No products found.</p>
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-16 h-16 rounded-3xl bg-muted flex items-center justify-center mb-4">
+              <ShoppingBag className="w-8 h-8 text-muted-foreground/40" />
+            </div>
+            <p className="text-foreground font-semibold mb-1">No products found</p>
+            <p className="text-sm text-muted-foreground">Try a different search or category</p>
+          </div>
         )}
 
-        <div className="space-y-2">
-          {products.map(p => (
-            <Link
-              key={p.id}
-              to={`/product/${p.id}`}
-              className="flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition border border-slate-100 gap-3"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold text-slate-800 truncate">{p.name}</p>
-                <p className="text-xs text-slate-500 truncate">{p.brand} · {p.pharmacy_name}</p>
-                <div className="mt-1">
-                  <Badge variant={STOCK_VARIANT[p.stock_level]}>
-                    {STOCK_LABEL[p.stock_level]}
-                  </Badge>
-                </div>
-              </div>
-              <p className="font-bold text-slate-800 text-sm shrink-0">{p.price_dzd.toLocaleString()} <span className="text-xs font-normal text-slate-400">DZD</span></p>
-            </Link>
-          ))}
-        </div>
+        {/* ── Product grid ── */}
+        {!loading && products.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {products.map(p => {
+              const stock = STOCK_BADGE[p.stock_level] || STOCK_BADGE.out
+              return (
+                <Link
+                  key={p.id}
+                  to={`/product/${p.id}`}
+                  className="group flex flex-col bg-background rounded-2xl border border-border p-5 hover:border-primary/40 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                >
+                  {/* Top row: category badge + stock */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      {p.category?.replace(/_/g, ' ')}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${stock.className}`}>
+                      {stock.label}
+                    </span>
+                  </div>
+
+                  {/* Name & brand */}
+                  <p className="font-black text-foreground text-base leading-tight mb-1 group-hover:text-primary transition-colors">
+                    {p.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-4">{p.brand}</p>
+
+                  {/* Footer: pharmacy + price */}
+                  <div className="mt-auto flex items-end justify-between gap-2">
+                    <p className="text-xs text-muted-foreground leading-tight line-clamp-2 flex-1">
+                      {p.pharmacy_name}
+                    </p>
+                    <p className="text-sm font-black text-foreground shrink-0">
+                      {p.price_dzd?.toLocaleString()}
+                      <span className="text-[10px] font-normal text-muted-foreground ml-0.5">DZD</span>
+                    </p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )

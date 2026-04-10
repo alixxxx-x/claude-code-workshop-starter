@@ -6,7 +6,7 @@ Read PROJECT.md for the full project plan. Always check it before starting a new
 ## Stack
 - **Framework**: React.js with JavaScript
 - **Styling**: Tailwind CSS v4, Shadcn, 21st Dev
-- **Database + Auth**: Django + PostgresSQL
+- **Database + Auth**: Django + SQLite
 - **Deploy**: Render (free tier)
 
 ## Commands

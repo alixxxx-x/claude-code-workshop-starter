@@ -87,10 +87,10 @@ export async function getMedicinePharmacies(id) {
 
 // ── Availability Reports ──────────────────────────────────────────────────────
 
-export async function createReport(pharmacyId, medicineId, status) {
+export async function createReport(pharmacyId, medicineId, status, confidence = 'unknown') {
   return request('/api/reports/', {
     method: 'POST',
-    body: JSON.stringify({ pharmacy: pharmacyId, medicine: medicineId, status }),
+    body: JSON.stringify({ pharmacy: pharmacyId, medicine: medicineId, status, confidence }),
   })
 }
 
